@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    />
+    <title>טבלת תוצאות CQB Room</title>
+    <meta
+      name="description"
+      content="טבלת תוצאות ל-CQB Room עם דירוג ציבורי ואזור ניהול מאובטח."
+    />
+    <meta name="theme-color" content="#17191d" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta
+      name="apple-mobile-web-app-status-bar-style"
+      content="black-translucent"
+    />
+    <meta name="format-detection" content="telephone=no" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="page-shell">
+      <div class="hud-noise" aria-hidden="true"></div>
+
+      <header class="hero">
+        <div class="hero-copy">
+          <div class="hero-tagline">
+            <span class="hero-line hero-line-yellow"></span>
+            <span class="hero-line hero-line-pink"></span>
+            <p class="eyebrow">CQB Room</p>
+          </div>
+          <h1>CQB Leaderboard</h1>
+        </div>
+
+        <div class="hero-side">
+          <button
+            class="admin-entry-button"
+            id="adminToggleButton"
+            type="button"
+            aria-expanded="false"
+          >
+            גישת צוות
+          </button>
+
+          <div class="hero-actions">
+          <button class="ghost-button" id="refreshButton" type="button">
+            רענון
+          </button>
+          </div>
+        </div>
+      </header>
+
+      <section
+        class="status-banner hidden"
+        id="statusBanner"
+        role="status"
+        aria-live="polite"
+      ></section>
+
+      <section class="stats-grid" aria-label="סטטיסטיקה">
+        <article class="stat-card">
+          <span class="stat-label">שחקנים בדירוג</span>
+          <strong class="stat-value" id="playersCount">0</strong>
+        </article>
+        <article class="stat-card">
+          <span class="stat-label">סך כל הניסיונות</span>
+          <strong class="stat-value" id="attemptsCount">0</strong>
+        </article>
+        <article class="stat-card">
+          <span class="stat-label">הזמן הטוב ביותר</span>
+          <strong class="stat-value" id="bestTimeValue">--</strong>
+        </article>
+      </section>
+
+      <main class="dashboard">
+        <section class="panel leaderboard-panel" aria-labelledby="leaderboardTitle">
+          <div class="panel-head">
+            <div>
+              <p class="panel-kicker">Leaderboard</p>
+              <h2 id="leaderboardTitle">הדירוג הראשי</h2>
+            </div>
+            <div
+              class="period-control"
+              id="periodControl"
+              role="group"
+              aria-label="טווח זמן"
+            >
+              <button
+                class="period-button"
+                type="button"
+                data-period="today"
+                aria-pressed="false"
+              >
+                היום
+              </button>
+              <button
+                class="period-button"
+                type="button"
+                data-period="week"
+                aria-pressed="false"
+              >
+                השבוע
+              </button>
+              <button
+                class="period-button is-active"
+                type="button"
+                data-period="all"
+                aria-pressed="true"
+              >
+                כל הזמנים
+              </button>
+            </div>
+          </div>
+
+          <div class="leaderboard-table-wrap">
+            <table class="leaderboard-table">
+              <thead>
+                <tr>
+                  <th>מקום</th>
+                  <th>שחקן</th>
+                  <th>זמן</th>
+                  <th>תאריך</th>
+                </tr>
+              </thead>
+              <tbody id="leaderboardBody"></tbody>
+            </table>
+            <div class="empty-state hidden" id="leaderboardEmpty">
+              עדיין אין תוצאות.
+            </div>
+          </div>
+        </section>
+
+        <aside class="right-column">
+          <section
+            class="panel admin-panel hidden"
+            id="adminPanel"
+            aria-labelledby="adminTitle"
+          >
+            <div class="panel-head">
+              <div>
+                <p class="panel-kicker">Admin</p>
+                <h2 id="adminTitle">ניהול</h2>
+              </div>
+              <button class="text-button hidden" id="logoutButton" type="button">
+                התנתקות
+              </button>
+            </div>
+
+            <div class="auth-box" id="authBox">
+              <p class="auth-title">כניסה עם סיסמה</p>
+              <p class="auth-text">
+                לאחר כניסה מוצלחת, המכשיר יישמר וייכנס אוטומטית בפעם הבאה.
+              </p>
+              <form class="stack-form" id="loginForm">
+                <label class="field">
+                  <span>סיסמה</span>
+                  <input
+                    id="passwordInput"
+                    name="password"
+                    type="password"
+                    autocomplete="current-password"
+                    placeholder="הכנס סיסמה"
+                    required
+                  />
+                </label>
+                <button class="primary-button" type="submit">כניסה</button>
+              </form>
+            </div>
+
+            <div class="admin-box hidden" id="adminBox">
+              <p class="auth-title">הוספת תוצאה</p>
+              <p class="auth-text">
+                יש להזין שם שחקן וזמן בפורמט <code>12.45</code> או
+                <code>1:12.45</code>.
+              </p>
+              <form class="stack-form" id="resultForm">
+                <label class="field">
+                  <span>שם שחקן</span>
+                  <input
+                    id="playerNameInput"
+                    name="playerName"
+                    type="text"
+                    maxlength="40"
+                    placeholder="לדוגמה: Daniel"
+                    required
+                  />
+                </label>
+                <label class="field">
+                  <span>זמן</span>
+                  <input
+                    id="timeInput"
+                    name="timeInput"
+                    type="text"
+                    inputmode="decimal"
+                    placeholder="לדוגמה: 18.42"
+                    required
+                  />
+                </label>
+                <button class="primary-button" type="submit">שמירה</button>
+              </form>
+            </div>
+          </section>
+
+          <section class="panel recent-panel" aria-labelledby="recentTitle">
+            <div class="panel-head">
+              <div>
+                <p class="panel-kicker">Recent</p>
+                <h2 id="recentTitle">ניסיונות אחרונים</h2>
+              </div>
+              <div class="panel-chip panel-chip-alt">Live Feed</div>
+            </div>
+
+            <div class="recent-list" id="recentList"></div>
+            <div class="empty-state hidden" id="recentEmpty">
+              ההיסטוריה תופיע כאן לאחר הוספת תוצאות.
+            </div>
+          </section>
+        </aside>
+      </main>
+    </div>
+
+    <script src="./config.js"></script>
+    <script src="./app.js"></script>
+  </body>
+</html>
