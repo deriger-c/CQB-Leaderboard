@@ -15,10 +15,13 @@
     activePeriod: "all",
     lastSubmittedResult: null,
     highlightedPlayerKey: null,
-    isSavingResult: false
+    isSavingResult: false,
+    lastUpdatedAt: null
   };
 
   var highlightTimer = null;
+  var autoRefreshTimer = null;
+  var autoRefreshIntervalMs = 30000;
 
   var elements = {
     statusBanner: document.getElementById("statusBanner"),
@@ -32,6 +35,7 @@
     playersCount: document.getElementById("playersCount"),
     attemptsCount: document.getElementById("attemptsCount"),
     bestTimeValue: document.getElementById("bestTimeValue"),
+    lastUpdated: document.getElementById("lastUpdated"),
     periodControl: document.getElementById("periodControl"),
     adminPanel: document.getElementById("adminPanel"),
     authBox: document.getElementById("authBox"),
@@ -50,6 +54,9 @@
 
   if (state.apiConfigured) {
     loadEntries();
+    startAutoRefresh();
+  } else {
+    renderLastUpdated();
   }
 
   function bindEvents() {
@@ -99,6 +106,18 @@
         setActivePeriod(button.getAttribute("data-period"));
       });
     }
+
+    document.addEventListener("visibilitychange", function () {
+      if (document.hidden) {
+        stopAutoRefresh();
+        return;
+      }
+
+      if (state.apiConfigured) {
+        loadEntries();
+        startAutoRefresh();
+      }
+    });
   }
 
   async function handleLoginSubmit(event) {
@@ -294,7 +313,9 @@
       });
       var payload = await parseResponse(response);
       state.entries = normalizeEntries(payload.entries || []);
+      state.lastUpdatedAt = new Date();
       renderAll();
+      renderLastUpdated();
 
       if (forceStatus) {
         showStatus("הנתונים עודכנו.", false);
@@ -643,6 +664,68 @@
     elements.bestTimeValue.textContent = leaderboard.length
       ? leaderboard[0].timeDisplay
       : "--";
+  }
+
+  function renderLastUpdated() {
+    if (!elements.lastUpdated) {
+      return;
+    }
+
+    if (!state.apiConfigured) {
+      elements.lastUpdated.textContent = "לא מחובר";
+      return;
+    }
+
+    if (!state.lastUpdatedAt) {
+      elements.lastUpdated.textContent = "טוען נתונים";
+      return;
+    }
+
+    elements.lastUpdated.textContent =
+      "עודכן " +
+      new Intl.DateTimeFormat("he-IL", {
+        hour: "2-digit",
+        minute: "2-digit"
+      }).format(state.lastUpdatedAt);
+  }
+
+  function startAutoRefresh() {
+    stopAutoRefresh();
+
+    autoRefreshTimer = setInterval(function () {
+      if (shouldSkipAutoRefresh()) {
+        return;
+      }
+
+      loadEntries();
+    }, autoRefreshIntervalMs);
+  }
+
+  function stopAutoRefresh() {
+    if (autoRefreshTimer) {
+      clearInterval(autoRefreshTimer);
+      autoRefreshTimer = null;
+    }
+  }
+
+  function shouldSkipAutoRefresh() {
+    return (
+      document.hidden ||
+      state.isLoading ||
+      state.isSavingResult ||
+      isAdminFormFocused()
+    );
+  }
+
+  function isAdminFormFocused() {
+    var activeElement = document.activeElement;
+
+    return Boolean(
+      activeElement &&
+        elements.adminPanel &&
+        elements.adminPanel.contains(activeElement) &&
+        (activeElement.tagName === "INPUT" || activeElement.tagName === "BUTTON")
+    );
   }
 
   function syncAuthUi() {

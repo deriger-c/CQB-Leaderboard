@@ -231,9 +231,16 @@ code {
 
 .hero-actions {
   display: flex;
+  align-items: center;
   gap: 12px;
   flex-wrap: wrap;
   justify-content: flex-end;
+}
+
+.last-updated {
+  color: var(--muted);
+  font-size: 0.84rem;
+  white-space: nowrap;
 }
 
 .admin-entry-button {
@@ -844,6 +851,10 @@ code {
     min-height: 40px;
     padding: 0 16px;
     align-self: flex-end;
+  }
+
+  .last-updated {
+    width: 100%;
   }
 }
 
