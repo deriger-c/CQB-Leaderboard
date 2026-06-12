@@ -1,11 +1,8 @@
 :root {
   --bg: #17191d;
   --bg-soft: #1d2026;
-  --panel: rgba(28, 31, 39, 0.86);
-  --panel-strong: rgba(34, 37, 45, 0.96);
   --text: #f7f3ea;
   --muted: #a2a0b0;
-  --line: rgba(255, 255, 255, 0.08);
   --line-strong: rgba(255, 255, 255, 0.16);
   --green: #73ff7c;
   --pink: #ff4fc8;
@@ -14,7 +11,14 @@
   --accent: #73ff7c;
   --accent-soft: rgba(115, 255, 124, 0.12);
   --danger: #ff8d76;
-  --shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+  --shadow: 0 18px 50px rgba(0, 0, 0, 0.34);
+  --glass: rgba(18, 20, 27, 0.28);
+  --glass-soft: rgba(18, 20, 27, 0.18);
+  --glass-strong: rgba(20, 22, 29, 0.32);
+  --hairline: rgba(255, 255, 255, 0.07);
+  --hairline-strong: rgba(255, 255, 255, 0.12);
+  --radius: 22px;
+  --radius-sm: 16px;
 }
 
 * {
@@ -36,11 +40,69 @@ body {
   color: var(--text);
   -webkit-tap-highlight-color: transparent;
   background:
-    radial-gradient(circle at top right, rgba(255, 79, 200, 0.18), transparent 24%),
-    radial-gradient(circle at top left, rgba(69, 216, 255, 0.18), transparent 28%),
-    radial-gradient(circle at 50% 20%, rgba(255, 228, 92, 0.08), transparent 26%),
-    linear-gradient(180deg, #1a1b1f 0%, #121317 100%);
+    radial-gradient(circle at top right, rgba(255, 79, 200, 0.16), transparent 26%),
+    radial-gradient(circle at top left, rgba(69, 216, 255, 0.16), transparent 30%),
+    radial-gradient(circle at 50% 120%, rgba(176, 107, 255, 0.16), transparent 42%),
+    radial-gradient(circle at 50% 24%, rgba(255, 228, 92, 0.06), transparent 26%),
+    linear-gradient(180deg, #14151a 0%, #0d0e12 100%);
+  background-attachment: fixed;
   background-repeat: no-repeat;
+}
+
+/* שכבת רקע אווירה: נשק ניאון מרחף ברקע (מעומעם) */
+.bg-fx {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.bg-fx::after {
+  /* ערפול עדין במרכז כדי שהתוכן יישאר קריא */
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(13, 14, 18, 0.42) 0%,
+    rgba(13, 14, 18, 0.08) 48%,
+    transparent 78%
+  );
+}
+
+.fx {
+  position: absolute;
+  top: 0;
+  left: var(--x);
+  width: var(--w);
+  height: auto;
+  color: var(--c);
+  opacity: 0;
+  filter: drop-shadow(0 0 5px var(--c)) drop-shadow(0 0 14px var(--c));
+  transform: translate3d(0, -12vh, 0) rotate(var(--r1));
+  animation: fxFall var(--dur) linear var(--delay) infinite;
+  will-change: transform, opacity;
+}
+
+@keyframes fxFall {
+  0% {
+    transform: translate3d(0, -14vh, 0) rotate(var(--r1));
+    opacity: 0;
+  }
+
+  12% {
+    opacity: var(--o, 0.1);
+  }
+
+  86% {
+    opacity: var(--o, 0.1);
+  }
+
+  100% {
+    transform: translate3d(0, 116vh, 0) rotate(var(--r2));
+    opacity: 0;
+  }
 }
 
 button,
@@ -65,6 +127,7 @@ code {
 
 .page-shell {
   position: relative;
+  z-index: 1;
   width: min(1160px, calc(100% - 40px));
   margin: 0 auto;
   padding: 36px 0 48px;
@@ -94,29 +157,32 @@ code {
   align-items: stretch;
   justify-content: space-between;
   gap: 28px;
-  padding: 28px 30px;
-  border: 1px solid var(--line-strong);
+  padding: 26px 30px;
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius);
   background:
-    linear-gradient(135deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.01)),
-    linear-gradient(180deg, rgba(34, 37, 45, 0.96), rgba(22, 24, 29, 0.94));
+    linear-gradient(160deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0) 60%),
+    var(--glass-strong);
+  -webkit-backdrop-filter: blur(26px) saturate(135%);
+  backdrop-filter: blur(26px) saturate(135%);
   box-shadow: var(--shadow);
   position: relative;
   overflow: hidden;
 }
 
+/* קצה מואר עדין בראש המשטח במקום פס צבעוני */
 .hero::before {
   content: "";
   position: absolute;
-  inset-inline-start: 0;
+  inset-inline: 0;
   top: 0;
-  width: 100%;
-  height: 4px;
+  height: 1px;
   background: linear-gradient(
     90deg,
-    var(--yellow) 0%,
-    var(--pink) 28%,
-    var(--blue) 62%,
-    var(--green) 100%
+    transparent,
+    var(--hairline-strong) 30%,
+    var(--hairline-strong) 70%,
+    transparent
   );
 }
 
@@ -150,9 +216,9 @@ code {
   transform: skew(-16deg);
 }
 
-.hero-line-yellow {
-  background: var(--yellow);
-  box-shadow: 0 0 18px rgba(255, 228, 92, 0.55);
+.hero-line-green {
+  background: var(--green);
+  box-shadow: 0 0 18px rgba(115, 255, 124, 0.55);
 }
 
 .hero-line-pink {
@@ -165,9 +231,10 @@ code {
 .stat-label {
   margin: 0 0 8px;
   color: var(--muted);
-  font-size: 0.78rem;
-  letter-spacing: 0.18em;
+  font-size: 0.72rem;
+  letter-spacing: 0.22em;
   text-transform: uppercase;
+  opacity: 0.78;
 }
 
 .hero h1,
@@ -177,8 +244,8 @@ code {
 }
 
 .hero h1 {
-  font-size: clamp(2.6rem, 5vw, 4.8rem);
-  line-height: 0.94;
+  font-size: clamp(2.3rem, 4.4vw, 3.9rem);
+  line-height: 0.96;
   text-transform: uppercase;
   background: linear-gradient(
     90deg,
@@ -188,7 +255,7 @@ code {
     var(--green) 76%,
     var(--yellow) 100%
   );
-  background-size: 220% auto;
+  background-size: 200% auto;
   color: transparent;
   -webkit-background-clip: text;
   background-clip: text;
@@ -211,22 +278,8 @@ code {
   }
 
   100% {
-    background-position: 220% 50%;
+    background-position: 200% 50%;
   }
-}
-
-.panel-chip {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 34px;
-  padding: 0 12px;
-  font-size: 0.8rem;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  border: 1px solid var(--line-strong);
-  background: rgba(255, 255, 255, 0.04);
 }
 
 .hero-actions {
@@ -316,47 +369,48 @@ code {
 .status-banner {
   margin-top: 18px;
   padding: 14px 18px;
-  border: 1px solid var(--line);
-  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-sm);
+  background: var(--glass-soft);
+  -webkit-backdrop-filter: blur(20px) saturate(125%);
+  backdrop-filter: blur(20px) saturate(125%);
 }
 
 .status-banner p {
   margin: 8px 0 0;
 }
 
+/* רצועת סטטיסטיקה אחת שקופה במקום שלושה בלוקים נפרדים */
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 28px;
-  margin-top: 30px;
-}
-
-.stat-card {
-  position: relative;
-  padding: 20px 22px;
-  border: 1px solid var(--line);
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.02)),
-    var(--panel);
+  margin-top: 26px;
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-sm);
+  background: var(--glass-soft);
+  -webkit-backdrop-filter: blur(22px) saturate(125%);
+  backdrop-filter: blur(22px) saturate(125%);
   box-shadow: var(--shadow);
   overflow: hidden;
 }
 
-.stat-card::before {
-  content: "";
-  position: absolute;
-  inset-inline-start: 0;
-  top: 0;
-  width: 5px;
-  height: 100%;
-  background: linear-gradient(180deg, var(--yellow), var(--blue), var(--green));
+.stat-card {
+  position: relative;
+  padding: 18px 22px;
+  border: 0;
+}
+
+.stat-card + .stat-card {
+  border-inline-start: 1px solid var(--hairline);
 }
 
 .stat-value {
   display: block;
-  font-size: clamp(1.85rem, 2.5vw, 2.45rem);
+  margin-top: 4px;
+  font-size: clamp(1.7rem, 2.3vw, 2.3rem);
   font-weight: 800;
   color: var(--yellow);
+  letter-spacing: -0.01em;
 }
 
 .dashboard {
@@ -374,23 +428,31 @@ code {
 
 .panel {
   position: relative;
-  padding: 24px;
-  border: 1px solid var(--line);
+  padding: 22px 24px;
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius);
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.02)),
-    var(--panel);
+    linear-gradient(165deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0) 55%),
+    var(--glass);
+  -webkit-backdrop-filter: blur(24px) saturate(130%);
+  backdrop-filter: blur(24px) saturate(130%);
   box-shadow: var(--shadow);
+  overflow: hidden;
 }
 
 .panel::before {
   content: "";
   position: absolute;
-  inset-inline-start: 0;
+  inset-inline: 0;
   top: 0;
-  width: 100%;
-  height: 3px;
-  background: linear-gradient(90deg, var(--blue), var(--pink), var(--yellow));
-  opacity: 0.8;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--hairline-strong) 25%,
+    var(--hairline-strong) 75%,
+    transparent
+  );
 }
 
 .panel-head {
@@ -401,23 +463,15 @@ code {
   margin-bottom: 18px;
 }
 
-.panel-chip {
-  color: var(--yellow);
-}
-
-.panel-chip-alt {
-  color: var(--blue);
-}
-
 /* בקרת טווח זמן (היום / השבוע / כל הזמנים) */
 .period-control {
   display: inline-flex;
   align-items: stretch;
   gap: 4px;
   padding: 4px;
-  border: 1px solid var(--line-strong);
+  border: 1px solid var(--hairline);
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.04);
+  background: rgba(255, 255, 255, 0.03);
 }
 
 .period-button {
@@ -515,7 +569,7 @@ code {
 .leaderboard-table {
   width: 100%;
   border-collapse: separate;
-  border-spacing: 0 12px;
+  border-spacing: 0;
 }
 
 .leaderboard-table th,
@@ -531,22 +585,38 @@ code {
 
 .leaderboard-table tbody tr {
   position: relative;
-  background:
-    linear-gradient(90deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.01)),
-    rgba(15, 17, 22, 0.82);
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+  background: transparent;
+  transition: background 200ms ease;
+}
+
+.leaderboard-table tbody tr:hover {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.05),
+    rgba(255, 255, 255, 0.012) 60%,
+    transparent
+  );
+}
+
+.leaderboard-table tbody td {
+  border-bottom: 1px solid var(--hairline);
+}
+
+.leaderboard-table tbody tr:last-child td {
+  border-bottom: 0;
 }
 
 .place-pill {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 48px;
-  min-height: 48px;
-  background: linear-gradient(135deg, var(--yellow), #f8b117);
-  color: #1a1c22;
+  min-width: 42px;
+  min-height: 42px;
+  border-radius: 13px;
+  border: 1px solid var(--hairline);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--muted);
   font-weight: 700;
-  box-shadow: 0 8px 20px rgba(255, 228, 92, 0.18);
 }
 
 .player-cell strong,
@@ -569,48 +639,66 @@ code {
 }
 
 .leaderboard-table tbody td {
-  height: 76px;
+  height: 66px;
   vertical-align: middle;
 }
 
-.leaderboard-table tbody tr td:first-child {
-  border-top-right-radius: 18px;
-  border-bottom-right-radius: 18px;
-}
-
-.leaderboard-table tbody tr td:last-child {
-  border-top-left-radius: 18px;
-  border-bottom-left-radius: 18px;
-}
-
+/* טופ 3 בסגנון רשימה שטוחה: גוון ניאון עדין שדוהה, ללא מסגרת/פלטה */
 .leaderboard-row-top1 {
-  background:
-    linear-gradient(90deg, rgba(255, 228, 92, 0.16), rgba(255, 255, 255, 0.02)),
-    rgba(20, 20, 25, 0.92);
+  background: linear-gradient(
+    90deg,
+    rgba(255, 228, 92, 0.13),
+    rgba(255, 228, 92, 0.015) 50%,
+    transparent
+  );
 }
 
 .leaderboard-row-top2 {
-  background:
-    linear-gradient(90deg, rgba(69, 216, 255, 0.14), rgba(255, 255, 255, 0.02)),
-    rgba(20, 20, 25, 0.92);
+  background: linear-gradient(
+    90deg,
+    rgba(69, 216, 255, 0.11),
+    rgba(69, 216, 255, 0.015) 50%,
+    transparent
+  );
 }
 
 .leaderboard-row-top3 {
-  background:
-    linear-gradient(90deg, rgba(255, 79, 200, 0.14), rgba(255, 255, 255, 0.02)),
-    rgba(20, 20, 25, 0.92);
+  background: linear-gradient(
+    90deg,
+    rgba(255, 79, 200, 0.11),
+    rgba(255, 79, 200, 0.015) 50%,
+    transparent
+  );
+}
+
+.leaderboard-row-top1:hover,
+.leaderboard-row-top2:hover,
+.leaderboard-row-top3:hover {
+  filter: brightness(1.15);
 }
 
 .leaderboard-row-top1 .place-pill {
+  border-color: transparent;
   background: linear-gradient(135deg, #fff0a0, var(--yellow));
+  color: #16181d;
+  font-weight: 800;
+  box-shadow: 0 6px 18px rgba(255, 228, 92, 0.22);
 }
 
 .leaderboard-row-top2 .place-pill {
+  border-color: transparent;
   background: linear-gradient(135deg, #b6f2ff, var(--blue));
+  color: #16181d;
+  font-weight: 800;
+  box-shadow: 0 6px 18px rgba(69, 216, 255, 0.2);
 }
 
 .leaderboard-row-top3 .place-pill {
+  border-color: transparent;
   background: linear-gradient(135deg, #ffb3ea, var(--pink));
+  color: #16181d;
+  font-weight: 800;
+  box-shadow: 0 6px 18px rgba(255, 79, 200, 0.2);
 }
 
 .auth-box,
@@ -658,11 +746,17 @@ code {
 .recent-card {
   display: grid;
   gap: 8px;
-  padding: 16px 18px;
-  border: 1px solid var(--line);
+  padding: 14px 16px;
+  border: 1px solid var(--hairline);
+  border-radius: 14px;
   background:
-    linear-gradient(90deg, rgba(69, 216, 255, 0.06), transparent 40%),
-    rgba(16, 18, 24, 0.78);
+    linear-gradient(90deg, rgba(69, 216, 255, 0.06), transparent 50%),
+    rgba(255, 255, 255, 0.02);
+  transition: box-shadow 200ms ease;
+}
+
+.recent-card:hover {
+  box-shadow: inset 0 0 0 1px var(--hairline-strong);
 }
 
 .recent-row {
@@ -696,6 +790,16 @@ code {
   display: none !important;
 }
 
+/* גיבוי לדפדפנים ללא backdrop-filter: רקע אטום יותר לשמירה על קריאות */
+@supports not ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
+  .hero,
+  .panel,
+  .stats-grid,
+  .status-banner {
+    background: rgba(18, 20, 27, 0.93);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -704,6 +808,14 @@ code {
     animation-iteration-count: 1 !important;
     transition-duration: 0.001ms !important;
     scroll-behavior: auto !important;
+  }
+
+  /* ללא תנועה: הנשק נשאר סטטי ומעומעם במקום ליפול */
+  .fx {
+    animation: none !important;
+    top: var(--y, 20%);
+    opacity: var(--o, 0.1);
+    transform: rotate(var(--r1));
   }
 }
 
@@ -740,12 +852,16 @@ code {
 
   .stats-grid {
     grid-template-columns: 1fr;
-    gap: 16px;
+  }
+
+  /* ברצועה אנכית הקו המפריד עובר לראש כל מקטע */
+  .stat-card + .stat-card {
+    border-inline-start: 0;
+    border-block-start: 1px solid var(--hairline);
   }
 
   .hero,
   .panel,
-  .stat-card,
   .status-banner {
     padding-inline: 18px;
   }
@@ -795,15 +911,19 @@ code {
     align-items: center;
     column-gap: 14px;
     row-gap: 2px;
-    padding: 14px 16px;
-    margin-bottom: 10px;
-    border-radius: 18px;
+    padding: 14px 6px;
+    border-bottom: 1px solid var(--hairline);
+  }
+
+  .leaderboard-table tbody tr:last-child {
+    border-bottom: 0;
   }
 
   .leaderboard-table tbody td {
     display: block;
     height: auto;
     padding: 0;
+    border-bottom: 0;
   }
 
   .leaderboard-table tbody td::before {

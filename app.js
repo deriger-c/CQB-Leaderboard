@@ -167,6 +167,7 @@
 
     var playerName = normalizePlayerName(elements.playerNameInput.value);
     var parsedTime = parseTimeInput(elements.timeInput.value);
+    var previousBestTimeMs = getPlayerBestTimeMs(playerName, state.entries);
 
     if (!playerName) {
       showStatus("יש להזין שם שחקן.", true);
@@ -194,11 +195,17 @@
       state.lastSubmittedResult = {
         normalizedName: normalizePlayerName(playerName),
         playerName: playerName,
-        timeMs: parsedTime.timeMs
+        timeMs: parsedTime.timeMs,
+        previousBestTimeMs: previousBestTimeMs
       };
 
       elements.resultForm.reset();
-      await loadEntries();
+      var didReload = await loadEntries();
+
+      if (!didReload) {
+        return;
+      }
+
       announceResultSaved(state.lastSubmittedResult);
       highlightPlayer(state.lastSubmittedResult.normalizedName);
       elements.playerNameInput.focus();
@@ -217,10 +224,10 @@
   function announceResultSaved(result) {
     var filtered = filterEntriesByPeriod(state.entries, state.activePeriod);
     var leaderboard = buildLeaderboard(filtered);
-    showStatus(getResultPlacement(result, leaderboard, state.entries), false);
+    showStatus(getResultPlacement(result, leaderboard), false);
   }
 
-  function getResultPlacement(result, leaderboard, allEntries) {
+  function getResultPlacement(result, leaderboard) {
     var placeIndex = leaderboard.findIndex(function (entry) {
       return entry.normalizedName === result.normalizedName;
     });
@@ -229,27 +236,32 @@
       return "התוצאה נשמרה (לא מופיעה בטווח המוצג).";
     }
 
-    var playerEntries = allEntries.filter(function (entry) {
-      return entry.normalizedName === result.normalizedName;
-    });
-
-    var bestTimeMs = playerEntries.reduce(function (best, entry) {
-      return entry.timeMs < best ? entry.timeMs : best;
-    }, Infinity);
-
-    var hadPrevious = playerEntries.length > 1;
-    var isPersonalBest = result.timeMs <= bestTimeMs;
+    var hadPrevious = Number.isFinite(result.previousBestTimeMs);
+    var isPersonalBest = hadPrevious && result.timeMs < result.previousBestTimeMs;
     var base = "התוצאה נשמרה: מקום #" + String(placeIndex + 1);
 
-    if (!isPersonalBest) {
+    if (hadPrevious && result.timeMs > result.previousBestTimeMs) {
       return "התוצאה נשמרה, אך השיא הקודם נשאר טוב יותר.";
     }
 
-    if (hadPrevious) {
+    if (isPersonalBest) {
       return base + " · שיא אישי";
     }
 
     return base;
+  }
+
+  function getPlayerBestTimeMs(playerName, entries) {
+    var normalizedName = normalizePlayerName(playerName);
+    var bestTimeMs = Infinity;
+
+    entries.forEach(function (entry) {
+      if (entry.normalizedName === normalizedName && entry.timeMs < bestTimeMs) {
+        bestTimeMs = entry.timeMs;
+      }
+    });
+
+    return bestTimeMs;
   }
 
   function highlightPlayer(normalizedName) {
@@ -320,10 +332,13 @@
       if (forceStatus) {
         showStatus("הנתונים עודכנו.", false);
       }
+
+      return true;
     } catch (error) {
       state.entries = [];
       renderAll();
       showStatus(error.message || "לא ניתן לטעון נתונים.", true);
+      return false;
     } finally {
       setBusy(false);
     }
